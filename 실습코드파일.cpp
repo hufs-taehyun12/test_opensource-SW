@@ -1,3 +1,4 @@
+//장태현 202102966 컴퓨터공학과
 #include<iostream>
 using namespace std;
 
