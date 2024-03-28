@@ -58,6 +58,11 @@ int main() {
 
 	a.showCoord();
 	b.showCoord();
+	a.showCoord();
+	b.showCoord();
+	a.showCoord();
+	b.showCoord();
+	
 
 	//++(++a);
 	//a.showCoord();
