@@ -57,7 +57,7 @@ int main() {
 	//Coord_2D b(20, 20);
 
 	a.showCoord();
-	//b.showCoord();
+	b.showCoord();//여기 고침
 
 	//++(++a);
 	//a.showCoord();
