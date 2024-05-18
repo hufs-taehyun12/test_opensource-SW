@@ -1,0 +1,163 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+// 입력 배열 (최대 크기 200)
+int arr[200] = { 0, };
+
+// 트리 노드 구조체 정의
+typedef struct TreeNode {
+    int val;  // 노드 값
+    struct TreeNode* left;  // 왼쪽 자식 노드
+    struct TreeNode* right; // 오른쪽 자식 노드
+} TreeNode;
+
+// 큐 노드 구조체 정의 (레벨 순회에 사용)
+typedef struct QueueNode {
+    TreeNode* treeNode;  // 큐에 저장된 트리 노드
+    struct QueueNode* next;  // 다음 큐 노드 포인터
+} QueueNode;
+
+// 큐 구조체 정의
+typedef struct Queue {
+    QueueNode* front;  // 큐의 앞
+    QueueNode* rear;   // 큐의 뒤
+} Queue;
+
+// 큐 생성 함수
+Queue* createQueue() {
+    Queue* queue = (Queue*)malloc(sizeof(Queue));
+    queue->front = queue->rear = NULL;
+    return queue;
+}
+
+// 큐가 비어 있는지 확인
+int isEmpty(Queue* queue) {
+    return queue->front == NULL;
+}
+
+// 큐에 트리 노드 추가
+void enqueue(Queue* queue, TreeNode* treeNode) {
+    QueueNode* temp = (QueueNode*)malloc(sizeof(QueueNode));
+    temp->treeNode = treeNode;
+    temp->next = NULL;
+    if (queue->rear == NULL) {
+        queue->front = queue->rear = temp;
+        return;
+    }
+    queue->rear->next = temp;
+    queue->rear = temp;
+}
+
+// 큐에서 트리 노드 제거
+TreeNode* dequeue(Queue* queue) {
+    if (isEmpty(queue))
+        return NULL;
+    QueueNode* temp = queue->front;
+    TreeNode* treeNode = temp->treeNode;
+    queue->front = queue->front->next;
+    if (queue->front == NULL)
+        queue->rear = NULL;
+    free(temp);
+    return treeNode;
+}
+
+// 트리 노드 생성
+TreeNode* createNode(int val) {
+    TreeNode* newNode = (TreeNode*)malloc(sizeof(TreeNode));
+    newNode->val = val;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+// 입력 배열을 이용해 트리를 빌드 (레벨 순서로 트리 생성)
+TreeNode* buildTree(int arr[], int n) {
+    if (n == 0 || arr[0] == -1) return NULL;
+
+    TreeNode* root = createNode(arr[0]);
+    Queue* queue = createQueue();
+    enqueue(queue, root);
+
+    int i = 1;
+    while (i < n) {
+        TreeNode* node = dequeue(queue);
+        if (node != NULL) {
+            if (i < n && arr[i] != -1) {
+                node->left = createNode(arr[i]);
+                enqueue(queue, node->left);
+            }
+            else {
+                node->left = NULL;
+            }
+            i++;
+            if (i < n && arr[i] != -1) {
+                node->right = createNode(arr[i]);
+                enqueue(queue, node->right);
+            }
+            else {
+                node->right = NULL;
+            }
+            i++;
+        }
+    }
+    return root;
+}
+
+// 0 값의 서브트리를 제거하는 함수
+TreeNode* removeZeroSubtrees(TreeNode* root) {
+    if (root == NULL) return NULL;
+    root->left = removeZeroSubtrees(root->left);
+    root->right = removeZeroSubtrees(root->right);
+    if (root->val == 0 && root->left == NULL && root->right == NULL) {
+        free(root);
+        return NULL;
+    }
+    return root;
+}
+
+// 트리를 레벨 순서로 출력하는 함수 (NULL 노드는 -1로 표시)
+void printLevelOrder(TreeNode* root) {
+    if (root == NULL) return;
+
+    Queue* queue = createQueue();
+    enqueue(queue, root);
+
+    while (!isEmpty(queue)) {
+        TreeNode* node = dequeue(queue);
+        if (node != NULL) {
+            printf("%d ", node->val);
+            if (node->left != NULL || node->right != NULL) {
+                if (node->left != NULL) {
+                    enqueue(queue, node->left);
+                }
+                else {
+                    enqueue(queue, createNode(-1));
+                }
+                if (node->right != NULL) {
+                    enqueue(queue, node->right);
+                }
+                else {
+                    enqueue(queue, createNode(-1));
+                }
+            }
+        }
+    }
+    printf("\n");
+}
+
+// 메인 함수
+int main() {
+    int i = 0, cnt = 0;
+    char str[400] = { 0, };
+    scanf("%[^\n]", str);
+    for (i = 2; i > 1; cnt += i > 0) {
+        i = sscanf(str, "%d%*[ ]%[^\n]", &arr[cnt], str);
+    }
+
+    TreeNode* root = buildTree(arr, cnt);
+    root = removeZeroSubtrees(root);
+    printLevelOrder(root);
+
+    return 0;
+}
